@@ -1,0 +1,33 @@
+# Build
+build/
+*.o
+*.so
+__pycache__/
+*.pyc
+
+# VSCode
+.vscode/
+
+# Python
+*.egg-info/
+*.pkl
+*.pt
+*.log
+
+# CUDA
+*.cu.dSYM/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# PyTorch C++ Extension Cache
+torch_extensions/
+
+# Dataset or images
+*.png
+*.jpg
+*.jpeg
+
+# Env
+.env
+venv/
