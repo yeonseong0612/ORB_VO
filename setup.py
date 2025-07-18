@@ -2,10 +2,10 @@ from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 setup(
-    name="cuda_orb_ext",
+    name="orb_cuda",
     ext_modules=[
         CUDAExtension(
-            name='cuda_orb_ext',
+            name='orb_cuda',
             sources=[
                 'src/orb/torch_bindings.cpp',
                 'src/orb/orb_wrapper.cpp',
