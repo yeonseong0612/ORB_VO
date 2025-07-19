@@ -2,7 +2,7 @@
 #include "orb.h"
 #include "orb_structures.h"
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::Tensor image2, int max_features) {
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::Tensor image2, int max_features) {
     TORCH_CHECK(image1.is_cuda() && image2.is_cuda(), "Image must be CUDA tensor");
     TORCH_CHECK(image1.dtype() == at::kByte && image2.dtype() == at::kByte, "Image must be uint8");
     TORCH_CHECK(image1.dim() == 2 && image1.dim() == 2, "Image must be 2D grayscale");
@@ -17,14 +17,19 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::
     // ORB 초기화
     orb::Orbor detector;
     detector.init(
-        5,
-        31,
-        2,
-        orb::HARRIS_SCORE,
-        31,
-        20,
-        -1,
-        max_features);
+            5,              // n_levels
+            31,             // edge_threshold
+            2,              // scale_factor
+            orb::HARRIS_SCORE,  // score_type
+            31,             // patch_size
+            20,             // fast_threshold
+            -1,             // iniThFAST
+            max_features    // max_pts
+    );
+
+    std::cout << "[INFO] ORB Init: nlevels=" << 8
+          << ", scale=1.2, edge_th=20, fast_th=15, max_feat=" << max_features << std::endl;
+
 
     // ORB 데이터 구조
     orb::OrbData data1, data2;
@@ -38,11 +43,19 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::
     detector.detectAndCompute(img1_ptr, data1, whp0, &desc1_ptr, true);
     detector.detectAndCompute(img2_ptr, data2, whp0, &desc2_ptr, true);
 
+    std::cout << "[DEBUG] Num Keypoints in Image1: " << data1.num_pts << std::endl;
+    std::cout << "[DEBUG] Num Keypoints in Image2: " << data2.num_pts << std::endl;
+
     int n1 = data1.num_pts;
     int n2 = data2.num_pts;
     // GPU -> CPU로 전체 구조체 복사
     CHECK(cudaMemcpy(data1.h_data, data1.d_data, sizeof(orb::OrbPoint) * n1, cudaMemcpyDeviceToHost));
     CHECK(cudaMemcpy(data2.h_data, data2.d_data, sizeof(orb::OrbPoint) * n2, cudaMemcpyDeviceToHost));
+
+    at::Tensor desc1_tensor = torch::empty({n1, 32}, torch::dtype(torch::kUInt8).device(torch::kCUDA));
+    at::Tensor desc2_tensor = torch::empty({n2, 32}, torch::dtype(torch::kUInt8).device(torch::kCUDA));
+    CHECK(cudaMemcpy(desc1_tensor.data_ptr<uint8_t>(), desc1_ptr, sizeof(uint8_t) * n1 * 32, cudaMemcpyDeviceToDevice));
+    CHECK(cudaMemcpy(desc2_tensor.data_ptr<uint8_t>(), desc2_ptr, sizeof(uint8_t) * n2 * 32, cudaMemcpyDeviceToDevice));
 
     // 매칭 수행
     detector.match(data1, data2, (unsigned char*)desc1_ptr, (unsigned char*)desc2_ptr);
@@ -73,5 +86,6 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::
     cudaFree(desc1_ptr);
     cudaFree(desc2_ptr);
 
-    return {kpts1, kpts2, matches};
+    return {kpts1, kpts2, desc1_tensor, desc2_tensor, matches};
+
 }

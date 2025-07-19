@@ -4,4 +4,4 @@
 #include <tuple>
 
 
-std::tuple<at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::Tensor image2, int max_features);
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> orb_match(at::Tensor image1, at::Tensor image2, int max_features);

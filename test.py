@@ -8,7 +8,7 @@ def load_image_grayscale(path):
     assert img is not None, f"이미지를 불러올 수 없음: {path}"
     return torch.from_numpy(img).to(torch.uint8).cuda(), img  # (Tensor, numpy)
 
-def visualize_matches(img1_np, img2_np, kpt1, kpt2, matches, max_matches=500):
+def visualize_matches(img1_np, img2_np, kpt1, kpt2, matches, max_matches=3000):
     kpt1_np = kpt1.cpu().numpy()
     kpt2_np = kpt2.cpu().numpy()
     matches_np = matches.cpu().numpy()
@@ -42,16 +42,19 @@ def visualize_matches(img1_np, img2_np, kpt1, kpt2, matches, max_matches=500):
 
 def main():
     # 이미지 불러오기
-    img1_tensor, img1_np = load_image_grayscale("0/000000.png")
-    img2_tensor, img2_np = load_image_grayscale("1/000000.png")
-
+    img1_tensor, img1_np = load_image_grayscale("datasets/sequences/00/image_0/000000.png")
+    img2_tensor, img2_np = load_image_grayscale("datasets/sequences/00/image_1/000000.png")
+    
+    img1_tensor = img1_tensor.contiguous().cuda()
+    img2_tensor = img2_tensor.contiguous().cuda()
     # 특징점 추출 및 매칭
-    kpt1, kpt2, matches = orb_cuda.orb_match(img1_tensor, img2_tensor, 3000)
+    kpt1, kpt2, _, _, matches = orb_cuda.orb_match(img1_tensor, img2_tensor, 3000)
 
     print(f"[INFO] Keypoints 1: {kpt1.shape}, Keypoints 2: {kpt2.shape}, Matches: {matches.shape}")
+    
 
     # 시각화
-    visualize_matches(img1_np, img2_np, kpt1, kpt2, matches)
+    #visualize_matches(img1_np, img2_np, kpt1, kpt2, matches)
 
 if __name__ == "__main__":
     main()

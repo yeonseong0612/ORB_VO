@@ -97,12 +97,8 @@ namespace orb
 		if (result.h_data != NULL && result.num_pts > 0)
 		{
 			std::cout << "[DEBUG] sizeof(OrbPoint): " << sizeof(OrbPoint) << " bytes" << std::endl;
-			std::cout << "[DEBUG] memcpy2D width (bytes): "
-					<< (3 * sizeof(int) + 2 * sizeof(float)) << " bytes" << std::endl;
-			std::cout << "[DEBUG] memcpy2D height: " << result.num_pts << std::endl;
-			int* h_ptr = &result.h_data[0].x;
-			int* d_ptr = &result.d_data[0].x;
-			CHECK(cudaMemcpy2D(h_ptr, sizeof(OrbPoint), d_ptr, sizeof(OrbPoint), 3 * sizeof(int) + 2 * sizeof(float), result.num_pts, cudaMemcpyDeviceToHost));
+			CHECK(cudaMemcpy(result.h_data, result.d_data, sizeof(OrbPoint) * result.num_pts, cudaMemcpyDeviceToHost));
+			std::cout << "[DEBUG] memcpy size: " << sizeof(OrbPoint) * result.num_pts << " bytes" << std::endl;
 		}
 	}
 
