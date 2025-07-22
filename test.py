@@ -54,7 +54,7 @@ def main():
     
 
     # 시각화
-    #visualize_matches(img1_np, img2_np, kpt1, kpt2, matches)
+    visualize_matches(img1_np, img2_np, kpt1, kpt2, matches)
 
 if __name__ == "__main__":
     main()

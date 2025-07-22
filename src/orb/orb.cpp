@@ -18,14 +18,7 @@ namespace orb
 
 	Orbor::~Orbor()
 	{
-		if (omem)
-		{
-			CHECK(cudaFree(omem));
-		}
-		if (vmem)
-		{
-			CHECK(cudaFree(vmem));
-		}
+
 	}
 
 
@@ -97,6 +90,8 @@ namespace orb
 		if (result.h_data != NULL && result.num_pts > 0)
 		{
 			std::cout << "[DEBUG] sizeof(OrbPoint): " << sizeof(OrbPoint) << " bytes" << std::endl;
+			std::cout << "[DEBUG] result.h_data: " << result.h_data << std::endl;
+			std::cout << "[DEBUG] result.d_data: " << result.d_data << std::endl;
 			CHECK(cudaMemcpy(result.h_data, result.d_data, sizeof(OrbPoint) * result.num_pts, cudaMemcpyDeviceToHost));
 			std::cout << "[DEBUG] memcpy size: " << sizeof(OrbPoint) * result.num_pts << " bytes" << std::endl;
 		}
@@ -167,7 +162,7 @@ namespace orb
 		osizes[0] = height * pitchs[0];
 		offsets[0] = 0;
 		offsets[1] = offsets[0] + osizes[0];
-
+		
 		for (int i = 0, j = 1, k = 2; j < max_octave; i++, j++, k++)
 		{
 			widths[j] = widths[i] >> 1;
