@@ -49,8 +49,6 @@ namespace orb
 
 	void Orbor::detectAndCompute(unsigned char* image, OrbData& result, int3 whp0, void** desc_addr, const bool compute_desc)
 	{
-	    std::cout << "[DEBUG] whp0: (" << whp0.x << ", " << whp0.y << ", " << whp0.z << ")" << std::endl;
-
 		// Update parameters
 		const bool reused = (whp0.x == width) && (whp0.y == height);
 		if ((reused && !omem) || !reused)
@@ -89,11 +87,7 @@ namespace orb
 		// Copy point data to host
 		if (result.h_data != NULL && result.num_pts > 0)
 		{
-			std::cout << "[DEBUG] sizeof(OrbPoint): " << sizeof(OrbPoint) << " bytes" << std::endl;
-			std::cout << "[DEBUG] result.h_data: " << result.h_data << std::endl;
-			std::cout << "[DEBUG] result.d_data: " << result.d_data << std::endl;
 			CHECK(cudaMemcpy(result.h_data, result.d_data, sizeof(OrbPoint) * result.num_pts, cudaMemcpyDeviceToHost));
-			std::cout << "[DEBUG] memcpy size: " << sizeof(OrbPoint) * result.num_pts << " bytes" << std::endl;
 		}
 	}
 
@@ -120,7 +114,6 @@ namespace orb
 		if (dev)
 		{
 			CHECK(cudaMalloc((void**)&data.d_data, size));
-	        std::cout << "[CUDA] d_data malloc at " << data.d_data << ", size = " << size << " bytes\n";
 		}
 	}
 
